@@ -7,7 +7,7 @@
 ### Prerequisite:
 * [Kubernetes](https://kubernetes.io/docs/tasks/tools/install-kubectl/) - Used to create resource in your K8S cluster
   * Kube Version > 1.10:
-    * [Instuction](#Install-on-cluster-version-<-1.10) to install on cluster version < 1.10
+    * [Instuction](#Install-on-cluster-version-=<-1.10) to install on cluster version =< 1.10
   * Disk size 50GB per node
 * [Codefresh](https://codefresh-io.github.io/cli/) - Used to create resource in Codefresh
   * Authenticated context exist under `$HOME/.cfconfig` or authenticate with [Codefesh CLI](https://codefresh-io.github.io/cli/getting-started/#authenticate)
@@ -45,7 +45,7 @@
 | --storage-class | string | Set a name of your custom storage class, note: this will not install volume provisioning components |
 | --venona-version | string | Version of venona to install (default is the latest) |
 
-#### Install on cluster version < 1.10
+#### Install on cluster version =< 1.10
 * Make sure the `PersistentLocalVolumes` [feature gate](https://kubernetes.io/docs/reference/command-line-tools-reference/feature-gates/) is turned on
 * Venona's agent is trying to load avaliables apis using api `/openapi/v2` endpoint
 Add this endpoint to ClusterRole `system:discovery` under `rules[0].nonResourceURLs`
