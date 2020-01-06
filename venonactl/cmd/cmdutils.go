@@ -6,6 +6,7 @@ import (
 	"os/user"
 	"path"
 	"strings"
+	"time"
 
 	"github.com/codefresh-io/go-sdk/pkg/codefresh"
 	sdkUtils "github.com/codefresh-io/go-sdk/pkg/utils"
@@ -27,10 +28,11 @@ var (
 
 	verbose bool
 
-	configPath string
-	cfAPIHost  string
-	cfAPIToken string
-	cfContext  string
+	configPath   string
+	cfAPIHost    string
+	cfAPIToken   string
+	cfAgentToken string
+	cfContext    string
 
 	kubeConfigPath string
 
@@ -84,36 +86,54 @@ func buildBasicStore(logger logger.Logger) {
 
 func extendStoreWithCodefershClient(logger logger.Logger) error {
 	s := store.GetStore()
-	if configPath == "" {
-		configPath = fmt.Sprintf("%s/.cfconfig", os.Getenv("HOME"))
-	}
+	if cfAgentToken == "" {
 
-	if cfAPIHost == "" && cfAPIToken == "" {
-		context, err := sdkUtils.ReadAuthContext(configPath, cfContext)
+		if configPath == "" {
+			configPath = fmt.Sprintf("%s/.cfconfig", os.Getenv("HOME"))
+		}
+
+		if cfAPIHost == "" && cfAPIToken == "" {
+			context, err := sdkUtils.ReadAuthContext(configPath, cfContext)
+			if err != nil {
+				return err
+			}
+			cfAPIHost = context.URL
+			cfAPIToken = context.Token
+			logger.Debug("Using codefresh context", "Context-Name", context.Name, "Host", cfAPIHost)
+		} else {
+			logger.Debug("Reading creentials from environment variables")
+			if cfAPIHost == "" {
+				cfAPIHost = "https://g.codefresh.io"
+			}
+		}
+
+		logger.Debug("Creating agent token")
+		client := codefresh.New(&codefresh.ClientOptions{
+			Auth: codefresh.AuthOptions{
+				Token: cfAPIToken,
+			},
+			Host: cfAPIHost,
+		})
+
+		agentName := fmt.Sprintf("generated-%s", time.Now().Format("20060102150405"))
+		agent, err := client.Agents().Create(agentName)
 		if err != nil {
 			return err
 		}
-		cfAPIHost = context.URL
-		cfAPIToken = context.Token
-		logger.Debug("Using codefresh context", "Context-Name", context.Name, "Host", cfAPIHost)
-	} else {
-		logger.Debug("Reading creentials from environment variables")
-		if cfAPIHost == "" {
-			cfAPIHost = "https://g.codefresh.io"
-		}
-	}
+		cfAgentToken = agent.Token
 
+	}
 	logger.Debug("Creating codefresh client", "host", cfAPIHost, "token", cfAPIToken)
 
 	client := codefresh.New(&codefresh.ClientOptions{
 		Auth: codefresh.AuthOptions{
-			Token: cfAPIToken,
+			Token: cfAgentToken,
 		},
 		Host: cfAPIHost,
 	})
 	s.CodefreshAPI = &store.CodefreshAPI{
 		Host:   cfAPIHost,
-		Token:  cfAPIToken,
+		Token:  cfAgentToken,
 		Client: client,
 	}
 

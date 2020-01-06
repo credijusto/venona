@@ -119,23 +119,10 @@ var installCmd = &cobra.Command{
 			s.Version.Latest.Version = version
 		}
 		s.ClusterInCodefresh = installCmdOptions.clusterNameInCodefresh
-		if installCmdOptions.installOnlyRuntimeEnvironment == true && installCmdOptions.skipRuntimeInstallation == true {
-			dieOnError(fmt.Errorf("Cannot use both flags skip-runtime-installation and only-runtime-environment"))
-		}
-		if installCmdOptions.installOnlyRuntimeEnvironment == true {
-			builder.Add(plugins.RuntimeEnvironmentPluginType)
-		} else if installCmdOptions.skipRuntimeInstallation == true {
-			if installCmdOptions.runtimeEnvironmentName == "" {
-				dieOnError(fmt.Errorf("runtime-environment flag is required when using flag skip-runtime-installation"))
-			}
-			s.RuntimeEnvironment = installCmdOptions.runtimeEnvironmentName
-			lgr.Info("Skipping installation of runtime environment, installing venona only")
-			builder.Add(plugins.VenonaPluginType)
-		} else {
-			builder.
-				Add(plugins.RuntimeEnvironmentPluginType).
+
+		// 	lgr.Info("Skipping installation of runtime environment, installing venona only")
+		builder.
 				Add(plugins.VenonaPluginType)
-		}
 		if isDefault {
 			builder.Add(plugins.VolumeProvisionerPluginType)
 		} else {
@@ -201,9 +188,7 @@ func init() {
 	installCmd.Flags().StringVar(&installCmdOptions.buildNodeSelector, "build-node-selector", "", "The kubernetes node selector \"key=value\" to be used by venona build resources (default is no node selector)")
 	installCmd.Flags().StringArrayVar(&installCmdOptions.buildAnnotations, "build-annotations", []string{}, "The kubernetes metadata.annotations as \"key=value\" to be used by venona build resources (default is no node selector)")
 
-	installCmd.Flags().BoolVar(&installCmdOptions.skipRuntimeInstallation, "skip-runtime-installation", false, "Set flag if you already have a configured runtime-environment, add --runtime-environment flag with name")
 	installCmd.Flags().BoolVar(&installCmdOptions.kube.inCluster, "in-cluster", false, "Set flag if venona is been installed from inside a cluster")
-	installCmd.Flags().BoolVar(&installCmdOptions.installOnlyRuntimeEnvironment, "only-runtime-environment", false, "Set to true to onlky configure namespace as runtime-environment for Codefresh")
 	installCmd.Flags().BoolVar(&installCmdOptions.dryRun, "dry-run", false, "Set to true to simulate installation")
 	installCmd.Flags().BoolVar(&installCmdOptions.setDefaultRuntime, "set-default", false, "Mark the install runtime-environment as default one after installation")
 	installCmd.Flags().BoolVar(&installCmdOptions.kubernetesRunnerType, "kubernetes-runner-type", false, "Set the runner type to kubernetes (alpha feature)")

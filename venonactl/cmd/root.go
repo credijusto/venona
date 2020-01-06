@@ -40,10 +40,12 @@ func init() {
 
 	viper.BindEnv("apihost", "CODEFRESH_API_HOST")
 	viper.BindEnv("apitoken", "CODEFRESH_API_TOKEN")
+	viper.BindEnv("agenttoken", "CODEFRESH_API_TOKEN")
 
 	rootCmd.PersistentFlags().StringVar(&configPath, "cfconfig", viper.GetString("cfconfig"), "Config file (default is $HOME/.cfconfig) [$CFCONFIG]")
 	rootCmd.PersistentFlags().StringVar(&cfAPIHost, "api-host", viper.GetString("apihost"), "Host of codefresh [$CODEFRESH_API_HOST]")
 	rootCmd.PersistentFlags().StringVar(&cfAPIToken, "api-token", viper.GetString("apitoken"), "Codefresh API token [$CODEFRESH_API_TOKEN]")
+	rootCmd.PersistentFlags().StringVar(&cfAgentToken, "agent-token", viper.GetString("agenttoken"), "Codefresh agent token [$CODEFRESH_AGENT_TOKEN]")
 	rootCmd.PersistentFlags().StringVar(&cfContext, "context", "", "Name of the context from --cfconfig (default is current-context)")
 
 	rootCmd.PersistentFlags().StringVar(&kubeConfigPath, "kube-config-path", viper.GetString("kubeconfig"), "Path to kubeconfig file (default is $HOME/.kube/config) [$KUBECONFIG]")
